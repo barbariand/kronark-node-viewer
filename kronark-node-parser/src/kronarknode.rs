@@ -69,7 +69,7 @@ impl NodeDefinitionV1 {
 
 		// If anything remains, assume parsing went wrong and error
 		if lexer.count() > 0 {
-			return Err(NodeParseError::FileToLong(lexer.bytes_read()));
+			return Err(NodeParseError::FileTooLong(lexer.bytes_read()));
 		}
 
 		Ok(def)
