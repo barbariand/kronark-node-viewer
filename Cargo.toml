@@ -3,6 +3,8 @@ name = "kronark-node-viewer"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members=["kronark-node-parser"]
 [dependencies]
-crossterm = "0.28.1"
-itertools = "0.13.0"
+kronark-node-parser = {path = "./kronark-node-parser"}
+clap = {version = "4.5.20", features = ["derive"]}

@@ -1,8 +1,15 @@
-mod kronarknode;
+use std::path::PathBuf;
 
+use clap::Parser;
+use kronark_node_parser::prelude::*;
+/// Parsing args, maybe we can read a node definition from pipes eventually
+#[derive(Parser)]
+struct Args {
+    filepath: PathBuf,
+}
 fn main() {
-	let filepath = std::env::args().nth(1).unwrap();
-	let data = std::fs::read(filepath).unwrap();
+	let args=Args::parse();
+    let data = std::fs::read(args.filepath).unwrap();
 
-	println!("{:#?}", kronarknode::NodeDefinition::from_bytes(data));
+    println!("{:#?}", Node::from_bytes(data));
 }
