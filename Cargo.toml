@@ -8,3 +8,4 @@ members=["kronark-node-parser"]
 [dependencies]
 kronark-node-parser = {path = "./kronark-node-parser"}
 clap = {version = "4.5.20", features = ["derive"]}
+clap-stdin = { version = "0.5.1", features = ["clap"] }

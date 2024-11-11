@@ -21,7 +21,7 @@ impl Roots {
         // performing bytes[0] << 2 with `Vec<u8>` will cause the upper two bits to be lost.
         let packed_bits: Vec<u16> = lexer.by_ref().take(5).map(|v| v as u16).collect();
         if packed_bits.len() < 5 {
-            return Err(NodeParseError::EOF("root positions",lexer.bytes_read()));
+            return Err(NodeParseError::EOF("root positions", lexer.bytes_read()));
         }
 
         // Separate the bytes out into sets of 10 bits
@@ -31,19 +31,19 @@ impl Roots {
         let output_root_y = ((packed_bits[3] & 0b00000011) << 8) | packed_bits[4];
 
         // Parse and construct output connections
-        let num_output_connections = lexer
-            .next()
-            .ok_or(NodeParseError::EOF("number of output connections",lexer.bytes_read()))?;
+        let num_output_connections = lexer.next().ok_or(NodeParseError::EOF(
+            "number of output connections",
+            lexer.bytes_read(),
+        ))?;
         let mut output_connections: Vec<(u8, u8)> = vec![];
         for _ in 0..num_output_connections {
-            let (node, socket) = lexer
-                .by_ref()
-                .next_tuple()
-                .ok_or(NodeParseError::EOF("output connections",lexer.bytes_read()))?;
+            let (node, socket) = lexer.by_ref().next_tuple().ok_or(NodeParseError::EOF(
+                "output connections",
+                lexer.bytes_read(),
+            ))?;
             output_connections.push((node, socket));
         }
 
-        
         Ok(Roots {
             input_root_x,
             input_root_y,

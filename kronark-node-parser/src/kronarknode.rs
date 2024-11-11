@@ -29,12 +29,12 @@ impl Node {
         let data_magic_number: Vec<u8> = lexer.by_ref().take(magic_number.len()).collect();
         match magic_number.cmp(&data_magic_number) {
             Ordering::Equal => (),
-            _ => return Err(NodeParseError::InvalidFile(lexer.bytes_read()),),
+            _ => return Err(NodeParseError::InvalidFile(lexer.bytes_read())),
         }
 
         let version_number: u8 = match lexer.next() {
             Some(v) => v,
-            None => return Err(NodeParseError::EOF("version number",lexer.bytes_read())),
+            None => return Err(NodeParseError::EOF("version number", lexer.bytes_read())),
         };
         match version_number {
             1 => Ok(Node::V1(NodeDefinitionV1::from_bytes(&mut lexer)?)),

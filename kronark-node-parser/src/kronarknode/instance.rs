@@ -14,15 +14,16 @@ pub struct Instance {
     pub sockets: Vec<Socket>,
 }
 impl Instance {
-    pub fn parse_table<T>( lexer: &mut Lexer<T>) -> Result<Vec<Self>, NodeParseError>
+    pub fn parse_table<T>(lexer: &mut Lexer<T>) -> Result<Vec<Self>, NodeParseError>
     where
         T: Iterator<Item = u8>,
     {
         let mut instances = vec![];
 
-        let num_instances = lexer
-            .next()
-            .ok_or(NodeParseError::EOF("number of instances",lexer.bytes_read()))?;
+        let num_instances = lexer.next().ok_or(NodeParseError::EOF(
+            "number of instances",
+            lexer.bytes_read(),
+        ))?;
 
         for _ in 0..num_instances {
             instances.push(Instance::from_bytes(lexer.by_ref())?);
@@ -34,16 +35,22 @@ impl Instance {
     where
         T: Iterator<Item = u8>,
     {
-
-        let key = lexer
+        let key = lexer.next().ok_or(NodeParseError::EOF(
+            "missing instance key",
+            lexer.bytes_read(),
+        ))? as usize;
+        let node_type = lexer
             .next()
-            .ok_or(NodeParseError::EOF("missing instance key",lexer.bytes_read()))? as usize;
-        let node_type = lexer.next().ok_or(NodeParseError::EOF("instance type",lexer.bytes_read()))? as usize;
+            .ok_or(NodeParseError::EOF("instance type", lexer.bytes_read()))?
+            as usize;
 
         // See `kronarknode::roots::Roots::parse_table` for rationale regarding `map` here
         let packed_bits: Vec<u16> = lexer.by_ref().take(4).map(|v| v as u16).collect();
         if packed_bits.len() < 4 {
-            return Err(NodeParseError::EOF("instance position, name, and sockets",lexer.bytes_read()));
+            return Err(NodeParseError::EOF(
+                "instance position, name, and sockets",
+                lexer.bytes_read(),
+            ));
         }
 
         let position_x = (packed_bits[0] << 2) | (packed_bits[1] >> 6);
@@ -54,12 +61,12 @@ impl Instance {
 
         let name_utf8: Vec<u8> = lexer.by_ref().take(name_len).collect();
         if name_utf8.len() < name_len {
-            return Err(NodeParseError::EOF("instance name",lexer.bytes_read()));
+            return Err(NodeParseError::EOF("instance name", lexer.bytes_read()));
         }
 
         let name = match String::from_utf8(name_utf8) {
             Ok(v) => v,
-            Err(e) => return Err(NodeParseError::UTF8EncodingError(e,lexer.bytes_read())),
+            Err(e) => return Err(NodeParseError::UTF8EncodingError(e, lexer.bytes_read())),
         };
         let mut sockets = Vec::with_capacity(socket_count);
         for _ in 0..socket_count {

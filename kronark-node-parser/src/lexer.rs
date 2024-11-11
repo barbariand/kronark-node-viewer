@@ -5,15 +5,15 @@ pub struct Lexer<I: Iterator<Item = u8>> {
     bytes: I,
 }
 impl<I: Iterator<Item = u8>> Lexer<I> {
-    pub fn new(iter: I) ->Self{
+    pub fn new(iter: I) -> Self {
         Self {
             read_bytes: 0,
             bytes: iter,
         }
     }
-	pub fn bytes_read(&self)->u64{
-		self.read_bytes
-	}
+    pub fn bytes_read(&self) -> u64 {
+        self.read_bytes
+    }
 }
 impl<I: Iterator<Item = u8>> Iterator for Lexer<I> {
     type Item = u8;
