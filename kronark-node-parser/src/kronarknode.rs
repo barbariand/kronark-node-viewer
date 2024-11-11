@@ -55,10 +55,6 @@ impl NodeDefinitionV1 {
 	where
 		T: Iterator<Item = u8>,
 	{
-		// I'm not a huge fan of passing around this iterator like this, but it really does
-		// seem like the most flexible and natural way to handle the bytes that I can think
-		// of. Open to suggestions for a better way, because I ended up writing the following
-		// line of code *quite* a few times.
 		// Pass iterator around to parse components
 		let def = NodeDefinitionV1 {
 			roots: Roots::parse_table(lexer)?,
