@@ -21,7 +21,7 @@ impl SocketType {
             3 => Self::IncomingSelect,
             4 => Self::IncomingSwitch,
             5 => Self::IncomingText,
-            6..7 => panic!("invalid socket type"),
+            6..=7 => panic!("invalid socket type"),
             _ => unreachable!(),
         }
     }
