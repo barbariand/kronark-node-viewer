@@ -35,12 +35,13 @@ impl Roots {
 			output_connections.push((node, socket));
 		}
 
-		Ok(Roots {
+		let ret = Ok(Roots {
 			input_root_x,
 			input_root_y,
 			output_root_x,
 			output_root_y,
 			output_connections,
-		})
+		});
+		ret
 	}
 }

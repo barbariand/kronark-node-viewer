@@ -89,7 +89,7 @@ impl Socket {
 			if flags.is_connected() {
 				let (node, socket) = iter.next_tuple().ok_or("EOF while reading socket connection")?;
 				data = Some(DataType::Connection(node, socket));
-			} else {
+			} else if !matches!(flags.get_type(), SocketType::IncomingSwitch) { // TODO: this is a dirty fix, I want to move this to something cleaner
 				let value_len_bytes: [u8; 4] = match iter.by_ref().take(4).collect::<Vec<u8>>().try_into() {
 					Ok(v) => v,
 					Err(_) => return Err("Failed to read 4 bytes for socket constant value length"),
