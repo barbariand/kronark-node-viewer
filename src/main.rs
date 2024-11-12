@@ -1,3 +1,5 @@
+mod tui;
+
 use std::io::Read;
 
 use clap::Parser;
@@ -17,7 +19,7 @@ fn main() {
 
 	let node_res = Node::from_bytes(ShortCircuitedReadIterator::new(data));
 	match node_res {
-		Ok(node) => println!("{:#?}", node),
+		Ok(node) => { tui::enter_node_view(node).ok(); },
 		Err(error) => eprintln!("{}", error),
 	}
 }
