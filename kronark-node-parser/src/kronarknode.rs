@@ -1,10 +1,10 @@
 use std::cmp::Ordering;
 
-mod instance;
-mod nodes;
-mod roots;
-mod socket;
-mod types;
+pub mod instance;
+pub mod nodes;
+pub mod roots;
+pub mod socket;
+pub mod types;
 
 use instance::Instance;
 use nodes::NodeEntry;
