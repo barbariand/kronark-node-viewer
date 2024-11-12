@@ -1,10 +1,8 @@
 mod tui;
-
-use std::io::Read;
-
 use clap::Parser;
 use clap_stdin::FileOrStdin;
 use kronark_node_parser::prelude::*;
+use std::io::Read;
 /// Parsing args, maybe we can read a node definition from pipes eventually
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -19,7 +17,9 @@ fn main() {
 
 	let node_res = Node::from_bytes(ShortCircuitedReadIterator::new(data));
 	match node_res {
-		Ok(node) => { tui::enter_node_view(node).ok(); },
+		Ok(node) => {
+			tui::enter_node_view(node).ok();
+		}
 		Err(error) => eprintln!("{}", error),
 	}
 }

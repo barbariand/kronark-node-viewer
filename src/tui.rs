@@ -1,17 +1,14 @@
+use kronark_node_parser::kronarknode::{
+	instance::Instance, nodes::NodeEntry, roots::Roots, types::TypeEntry, Node,
+};
+use ratatui::buffer::Buffer;
+use ratatui::crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use ratatui::layout::Rect;
+use ratatui::style::Color;
+use ratatui::widgets::Widget;
+use ratatui::DefaultTerminal;
 use std::collections::HashMap;
 use std::ops::Deref;
-
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
-use ratatui::widgets::Widget;
-
-use kronark_node_parser::kronarknode::{
-	Node,
-	instance::Instance,
-	nodes::NodeEntry,
-	roots::Roots,
-	types::TypeEntry,
-};
 
 // Take ownership of a `Node` and parse out its contents
 // The data will be taken out of the node and restructured to make rendering easier
@@ -44,7 +41,7 @@ use kronark_node_parser::kronarknode::{
 // compress the vertical space as much as possible, as shown below:
 // ********************************
 // ───┐ ┌────
-//    │ │
+//	  │ │
 // ─────┘────
 // ********************************
 // In this situation, the line starting at the top left was drawn first, extended out to its target
@@ -81,15 +78,40 @@ use kronark_node_parser::kronarknode::{
 struct InstanceID(usize);
 impl Deref for InstanceID {
 	type Target = usize;
-	fn deref(&self) -> &Self::Target { &self.0 }
+	fn deref(&self) -> &Self::Target {
+		&self.0
+	}
 }
 
 // TODO: We need a way to store the padding. Should it be here or elsewhere?
 struct Column {
 	instances: Vec<InstanceID>,
-	width: i32, // Max width of any instance in the column, signed to play nicely with shifts
+	//width: i32, // Max width of any instance in the column, signed to play nicely with shifts
 }
-
+impl Column {
+	fn draw(
+		&self,
+		instance_table: &HashMap<InstanceID, Instance>,
+		mut pos_x: i32,
+		mut pos_y: i32,
+		area: Rect,
+		buf: &mut Buffer,
+	) -> Rect {
+		let mut width = 0;
+		for instance_id in &self.instances {
+			let instance = instance_table.get(instance_id);
+			let area = match instance {
+				Some(i) => i.draw(pos_x, pos_y, buf),
+				None => todo!(),
+			};
+			pos_x += area.x as i32;
+			if pos_y + area.y as i32 > width {
+				width = pos_y + area.y as i32
+			}
+		}
+		todo!()
+	}
+}
 struct NodeDefRenderer {
 	roots: Roots,
 	// We aren't guaranteed to have consecutive instance IDs, so a `HashMap` it is
@@ -115,7 +137,7 @@ impl NodeDefRenderer {
 				}
 
 				// TODO: Here we would parse the data and generate the columns
-				let mut instance_layout = vec!();
+				let mut instance_layout = vec![];
 
 				NodeDefRenderer {
 					roots,
@@ -126,24 +148,66 @@ impl NodeDefRenderer {
 					x_shift: 0,
 					y_shift: 0,
 				}
-			},
+			}
 			#[allow(unreachable_patterns)]
 			_ => panic!("unsupported version"),
 		}
 	}
+	pub fn run(mut self, mut terminal: DefaultTerminal) -> std::io::Result<()> {
+		loop {
+			// Render
+			terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
+			// Wait for events
+			if let Event::Key(k) = event::read()? {
+				if k.kind == KeyEventKind::Press && k.code == KeyCode::Char('q') {
+					return Ok(());
+				}
+
+				match k.code {
+					KeyCode::Left => self.x_shift += 1,
+					KeyCode::Right => self.x_shift -= 1,
+					KeyCode::Up => self.y_shift += 1,
+					KeyCode::Down => self.y_shift -= 1,
+					_ => (),
+				}
+			}
+		}
+	}
 }
 impl Widget for &NodeDefRenderer {
-	fn render(self, area: Rect, buffer: &mut Buffer) {
-		todo!()
+	fn render(self, area: Rect, buf: &mut Buffer) {
+		// Clear buffer
+		for x in 0..area.x {
+			for y in 0..area.y {
+				if let Some(cell) = buf.cell_mut((x, y)) {
+					cell.set_char(' ');
+					cell.set_fg(Color::default());
+					cell.set_bg(Color::default());
+				}
+			}
+		}
+
+		// Draw nodes with offsets
+		for column in &self.instance_layout {
+			column.draw(&self.instance_table, self.x_shift, self.y_shift, area, buf);
+		}
 	}
 }
 
-fn run(renderer: NodeDefRenderer) {
-	todo!();
+trait Draw {
+	fn draw(&self, pos_x: i32, pos_y: i32, buf: &mut Buffer) -> Rect;
 }
+impl Draw for Instance {
+	fn draw(&self, pos_x: i32, pos_y: i32, buf: &mut Buffer) -> Rect {
+		self.node_type
+		for socket in sockets{
 
+		}
+		todo
 // This will setup the terminal and the renderer struct, then enter another function to loop
 // drawing and event processing
 pub fn enter_node_view(node: Node) -> std::io::Result<()> {
-	todo!()
+	let terminal = ratatui::init();
+	let nodedef = NodeDefRenderer::from_node(node);
+	nodedef.run(terminal)
 }
